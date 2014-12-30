@@ -117,9 +117,11 @@ foreach my $l (@links) {
 
 sub mktemp {
 	my $c;
+	my $td = ($ENV{'TMPDIR'} || "/tmp/");
 	while(1) {
-		my $tmp = $wantPath . "/" . "historious_output_" . int(rand(99999)) . ".png";
+		my $tmp = "$td/historious_output_" . int(rand(99999)) . ".png";
 		if(! -f $tmp) {
+			dwarn "temporary output to $tmp";
 			return $tmp;
 		}
 		if(++$c > 100) {
