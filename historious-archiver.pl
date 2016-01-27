@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use File::Which; 
+use File::Which;
 use Time::Out qw(timeout) ;
+use File::Temp qw (tempfile);
 use Data::Dumper;
 use Carp;
 use WWW::Mechanize;
@@ -15,11 +16,11 @@ use Getopt::Long;
 	GetOptions ("help"  => \$help);
 	if($help) {
 		croak
-			"Usage: ./historious-archiver.pl\n" . 
-			"Environment variables: \n" . 
-			"\t HISTORIOUS_DEBUG=0,1,2 controls debug level\n" . 
-			"\t HISTORIOUS_USERNAME=.. login username\n" . 
-			"\t HISTORIOUS_PASSWORD=.. login password\n" . 
+			"Usage: ./historious-archiver.pl\n" .
+			"Environment variables: \n" .
+			"\t HISTORIOUS_DEBUG=0,1,2 controls debug level\n" .
+			"\t HISTORIOUS_USERNAME=.. login username\n" .
+			"\t HISTORIOUS_PASSWORD=.. login password\n" .
 			"\t HISTORIOUS_SAVEPATH=/save/path/ destination path";
 	}
 }
@@ -100,7 +101,7 @@ foreach my $l (@links) {
 	}
 
 	dwarn "rendering $output";
-	my $tmp = mktemp();
+    my (undef,$tmp) = tempfile();
 	if(render(
 		binary => $phantomJsBinary,
 		script => $phantomJsPng,
@@ -112,21 +113,6 @@ foreach my $l (@links) {
 		rename($tmp,$output) || croak("$! $@");
 	} else {
 		carp "rendering $output failed";
-	}
-}
-
-sub mktemp {
-	my $c;
-	my $td = ($ENV{'TMPDIR'} || "/tmp/");
-	while(1) {
-		my $tmp = "$td/historious_output_" . int(rand(99999)) . ".png";
-		if(! -f $tmp) {
-			dwarn "temporary output to $tmp";
-			return $tmp;
-		}
-		if(++$c > 100) {
-			croak "it looks like $wantPath is full of temporary files ($wantPath/historious_output_*), ensure no running processes then remove them";
-		}
 	}
 }
 
